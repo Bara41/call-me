@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Контакти | call me</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <!-- Навігація -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+      <a class="navbar-brand d-flex align-items-center" href="index.html">
+        <img src="img/logo.png" alt="Логотип" width="30" height="30" class="me-2">
+        call me
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavIndex">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavIndex">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link active" href="index.html">Головна</a></li>
+          <li class="nav-item"><a class="nav-link" href="profile.html">Профіль</a></li>
+          <li class="nav-item"><a class="nav-link" href="about.html">Про додаток</a></li>
+          <li class="nav-item"><a class="nav-link" href="login.html">Вхід</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Основний вміст -->
+  <main class="container my-5">
+    <h1 class="mb-4 text-center">Ваші контакти</h1>
+
+    <!-- Пошук, сортування та кнопки -->
+    <div class="row mb-3 align-items-end">
+      <div class="col-md-4">
+        <input type="text" class="form-control" id="searchInput" placeholder="Пошук за ім’ям або прізвищем" oninput="renderContacts()">
+      </div>
+      <div class="col-md-3">
+        <select class="form-select" onchange="sortContacts(this.value)">
+          <option value="">Сортувати за...</option>
+          <option value="name">Ім’ям</option>
+          <option value="surname">Прізвищем</option>
+        </select>
+      </div>
+      <div class="col-md-5 text-end">
+        <button class="btn btn-success me-2" onclick="showAddForm()">➕ Додати контакт</button>
+        <button class="btn btn-warning" onclick="showEditForm()">✏️ Змінити контакт</button>
+      </div>
+    </div>
+
+    <!-- Таблиця контактів -->
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped" id="contactsTable">
+        <thead class="table-primary">
+          <tr>
+            <th>Ім’я</th>
+            <th>Прізвище</th>
+            <th>Номер телефону</th>
+          </tr>
+        </thead>
+        <tbody id="contactsBody">
+          <!-- Контакти вставляються динамічно -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Футер -->
+  <footer class="bg-light text-center py-3">
+    <p class="mb-0">© 2025 call me. Всі права захищені.</p>
+  </footer>
+
+  <!-- Скрипт -->
+  <script>
+    let contacts = JSON.parse(localStorage.getItem("contacts")) || [
+      { name: "Іван", surname: "Петренко", phone: "0981234567" },
+      { name: "Олена", surname: "Іванова", phone: "0977654321" }
+    ];
+    let selectedIndex = -1;
+
+    function renderContacts() {
+      const tbody = document.getElementById("contactsBody");
+      const query = document.getElementById("searchInput").value.toLowerCase();
+
+      tbody.innerHTML = "";
+      contacts
+        .filter(c =>
+          c.name.toLowerCase().includes(query) ||
+          c.surname.toLowerCase().includes(query)
+        )
+        .forEach((contact, index) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${contact.name}</td>
+            <td>${contact.surname}</td>
+            <td>${contact.phone}</td>
+          `;
+          row.onclick = () => selectRow(index, row);
+          tbody.appendChild(row);
+        });
+    }
+
+    function sortContacts(by) {
+      if (by === "name") {
+        contacts.sort((a, b) => a.name.localeCompare(b.name));
+      } else if (by === "surname") {
+        contacts.sort((a, b) => a.surname.localeCompare(b.surname));
+      }
+      localStorage.setItem("contacts", JSON.stringify(contacts));
+      renderContacts();
+    }
+
+    function showAddForm() {
+      const name = prompt("Введіть ім’я:");
+      const surname = prompt("Введіть прізвище:");
+      const phone = prompt("Введіть номер телефону:");
+      if (name && surname && phone) {
+        contacts.push({ name, surname, phone });
+        localStorage.setItem("contacts", JSON.stringify(contacts));
+        renderContacts();
+      }
+    }
+
+    function showEditForm() {
+      if (selectedIndex === -1) {
+        alert("Оберіть контакт для редагування (натисніть на рядок)");
+        return;
+      }
+      const contact = contacts[selectedIndex];
+      const name = prompt("Змінити ім’я:", contact.name);
+      const surname = prompt("Змінити прізвище:", contact.surname);
+      const phone = prompt("Змінити номер телефону:", contact.phone);
+      if (name && surname && phone) {
+        contacts[selectedIndex] = { name, surname, phone };
+        localStorage.setItem("contacts", JSON.stringify(contacts));
+        renderContacts();
+        selectedIndex = -1;
+      }
+    }
+
+    function selectRow(index, row) {
+      const rows = document.querySelectorAll("#contactsBody tr");
+      rows.forEach(r => r.classList.remove("table-warning"));
+      row.classList.add("table-warning");
+      selectedIndex = index;
+    }
+
+    // Початкове завантаження
+    renderContacts();
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
